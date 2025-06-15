@@ -1,89 +1,67 @@
-"use client"
+import React, { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { login } from '../../api/api';
 
-import { useState } from "react"
-import { Link } from "react-router-dom"
+const Login = () => {
+  const [form, setForm] = useState({ username: '', password: '' });
+  const navigate = useNavigate();
 
-function Login() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
+  const { mutate, isPending, error } = useMutation({
+    mutationFn: login,
+    onSuccess: (data) => {
+      // Tokenni localStorage ga saqlash
+      localStorage.setItem('user', JSON.stringify(data));
+      navigate('/'); // Dashboardga redirect
+    },
+  });
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-
-    // Basic validation
-    if (!email || !password) {
-      setError("Please fill in all fields")
-      return
-    }
-
-    // Here you would typically handle authentication
-    console.log("Login attempt with:", { email, password })
-    alert("Login functionality would be implemented here")
-
-    // Reset form
-    setEmail("")
-    setPassword("")
-    setError("")
-  }
+    e.preventDefault();
+    mutate(form);
+  };
 
   return (
-    <div className="min-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-      <div className="px-6 py-8">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">Login to Your Account</h2>
+    <div className="flex justify-center items-center h-screen bg-blue-100">
+      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-80">
+        <h2 className="text-xl font-semibold mb-4 text-center">Login</h2>
 
-        {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
+        <input
+          type="text"
+          name="username"
+          placeholder="Username"
+          value={form.username}
+          onChange={handleChange}
+          className="w-full p-2 mb-3 border border-amber-400 rounded"
+          required
+        />
 
-        <form onSubmit={handleSubmit}>
-          <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-              Email
-            </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="email"
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={form.password}
+          onChange={handleChange}
+          className="w-full p-2 mb-3 border border-amber-400 rounded"
+          required
+        />
 
-          <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-              Password
-            </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="password"
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          disabled={isPending}
+        >
+          {isPending ? 'Logging in...' : 'Login'}
+        </button>
 
-          <div className="flex items-center justify-between">
-            <button
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
-              type="submit"
-            >
-              Sign In
-            </button>
-          </div>
-        </form>
-
-        <div className="text-center mt-6">
-          <p className="text-sm text-gray-600">
-            Don't have an account?{" "}
-            <Link to="/login/register" className="text-blue-500 hover:text-blue-700">
-              Register here
-            </Link>
-          </p>
-        </div>
-      </div>
+        {error && <p className="text-red-500 mt-2 text-sm">Login failed. Try valid credentials.</p>}
+      </form>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

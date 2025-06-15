@@ -7,6 +7,7 @@ import {
   UserOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  ProductFilled,
 } from '@ant-design/icons';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -19,7 +20,8 @@ const AppSidebar = ({ collapsed, setCollapsed }) => {
     const path = location.pathname;
     if (path.startsWith('/posts')) return '2';
     if (path.startsWith('/todos')) return '3';
-    if (path.startsWith('/profile')) return '4';
+    if (path.startsWith('/products')) return '4';
+    if (path.startsWith('/profile')) return '5';
     return '1';
   };
 
@@ -48,7 +50,10 @@ const AppSidebar = ({ collapsed, setCollapsed }) => {
         <Menu.Item key="3" icon={<CheckCircleOutlined />}>
           <Link to="/todos">Todos</Link>
         </Menu.Item>
-        <Menu.Item key="4" icon={<UserOutlined />}>
+        <Menu.Item key="4" icon={<ProductFilled />}>
+          <Link to="/products">Products</Link>
+        </Menu.Item>
+        <Menu.Item key="5" icon={<UserOutlined />}>
           <Link to="/profile">Profile</Link>
         </Menu.Item>
       </Menu>

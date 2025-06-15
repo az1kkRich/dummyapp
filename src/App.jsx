@@ -1,11 +1,13 @@
 import { Dropdown, Layout } from 'antd';
-import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { useLayoutEffect, useState } from 'react';
+import { Outlet,  useNavigate } from 'react-router-dom';
 import AppSidebar from './components/AppSideBar';
 import toast from 'react-hot-toast';
 import { FaUserCog } from 'react-icons/fa';
 import { FiDelete, FiLogOut, FiSettings } from 'react-icons/fi';
 import Search from 'antd/es/transfer/search';
+import { useQuery } from '@tanstack/react-query';
+import { getMe } from './api/api';
 
 const { Header, Content } = Layout;
 
@@ -13,12 +15,15 @@ const { Header, Content } = Layout;
 const App = () => {
   const [collapsed, setCollapsed] = useState(false);
 
+  const navigate = useNavigate()
+
   const handleMenuClick = (e) => {
-    toast.success('Click on menu item.');
-    console.log('click', e);
+    if (e.key == '1') {
+      localStorage.removeItem("user")
+      navigate("/login")
+    }
   };
 
-  const onSearch = (value, _e, info) => console.log(info?.source, value);
   
   const items = [
     {
@@ -44,19 +49,44 @@ const App = () => {
     items,
     onClick: handleMenuClick,
   };
+
+  const {data, isLoading, error} = useQuery({
+    queryKey: ['me'],
+    queryFn: getMe,
+  });
+  
+  useLayoutEffect(() => {
+    const width = window.innerWidth;
+    if (width < 768) {
+      setCollapsed(true);
+    } else {
+      setCollapsed(false);
+    } 
+  })
+
   return (
     <Layout className="min-h-[100vh] ">
+
       <AppSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
       <Layout >
         <Header className="bg-white shadow-sm flex items-center  h-16 ">
           <div className="w-full flex justify-between items-center">
-            <Search placeholder="input search text" onSearch={onSearch} enterButton  size='large' />
-
+            <div className='md:flex gap-2 hidden '>
+              {
+                isLoading ? <span>Loading...</span> : error ? <span className='text-red-500'>Error fetching user data</span> : <div className='flex gap-3'>
+                    <img src={data.image} className='w-10 h-10 border' alt="" />
+                    <div className='flex flex-col'>
+                      <span className='text-lg font-semibold '>{data.role}</span>
+                      <span className='text-sm text-gray-500 mt-[-8px]'>{data.email}</span>
+                    </div>
+                </div> 
+              }
+            </div>
             
             
             <Dropdown.Button menu={menuProps} size='large' className='flex! justify-end!' placement="bottom" icon={<FaUserCog />}>
-              Azamat Pulatov
+              {isLoading ? 'Loading...' : error ? 'Error' : data?.username || `${data.username}`}
             </Dropdown.Button>
 
           </div>
